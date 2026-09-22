@@ -371,7 +371,8 @@ function frame(t) {
   if (!G.running) return;
   const dt = Math.min(0.05, (t - G.last) / 1000); G.last = t;
   if (!G.paused) {
-    G.speed = (G.level === 0 && G.gates.filter(g => g.done).length < 2) ? 110 : 165;
+    const doneN = G.gates.filter(g => g.done).length;
+    G.speed = (G.level === 0 && doneN < 2) ? 140 : 190 + G.level * 12 + Math.min(doneN * 4, 40);
     G.x += G.speed * dt;
     const camX = G.x - document.getElementById('world').clientWidth * PLAYER_X;
     G.track.style.transform = `translateX(${-camX}px)`;
