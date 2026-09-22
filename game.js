@@ -146,15 +146,29 @@ function setLane(l) {
 document.getElementById('lane-up').addEventListener('click', () => setLane(G.lane - 1));
 document.getElementById('lane-down').addEventListener('click', () => setLane(G.lane + 1));
 document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { G.boost = true; }
   if (!G.running || G.paused) return;
   if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') setLane(G.lane - 1);
   if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') setLane(G.lane + 1);
 });
-let touchY = null;
-document.getElementById('world').addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('keyup', e => {
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') G.boost = false;
+});
+window.addEventListener('blur', () => { G.boost = false; });
+let touchY = null, touchX = null;
+document.getElementById('world').addEventListener('touchstart', e => {
+  touchY = e.touches[0].clientY; touchX = e.touches[0].clientX;
+  if (touchX > document.getElementById('world').clientWidth * 0.6) G.boost = true;
+}, { passive: true });
+document.getElementById('world').addEventListener('touchmove', e => {
+  if (touchX === null) return;
+  const dx = e.touches[0].clientX - touchX;
+  if (dx > 30) G.boost = true;
+}, { passive: true });
 document.getElementById('world').addEventListener('touchend', e => {
+  G.boost = false;
   if (touchY === null) return;
-  const dy = e.changedTouches[0].clientY - touchY; touchY = null;
+  const dy = e.changedTouches[0].clientY - touchY; touchY = null; touchX = null;
   if (Math.abs(dy) > 24) setLane(G.lane + (dy > 0 ? 1 : -1));
 }, { passive: true });
 
@@ -372,8 +386,9 @@ function frame(t) {
   const dt = Math.min(0.05, (t - G.last) / 1000); G.last = t;
   if (!G.paused) {
     const doneN = G.gates.filter(g => g.done).length;
-    G.speed = (G.level === 0 && doneN < 2) ? 140 : 190 + G.level * 12 + Math.min(doneN * 4, 40);
-    G.x += G.speed * dt;
+    G.speed = (G.level === 0 && doneN < 2) ? 150 : 230 + G.level * 24 + Math.min(doneN * 8, 80);
+    document.getElementById('world').classList.toggle('boosting', !!G.boost);
+    G.x += G.speed * (G.boost ? 1.6 : 1) * dt;
     const camX = G.x - document.getElementById('world').clientWidth * PLAYER_X;
     G.track.style.transform = `translateX(${-camX}px)`;
 

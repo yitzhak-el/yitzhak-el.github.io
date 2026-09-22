@@ -187,3 +187,7 @@ button { font-family: inherit; }
 /* hint glow on the right answer during onboarding */
 .obj.bubble.hint { box-shadow: 0 0 0 5px #ffd43b, 0 0 26px 8px rgba(255,212,59,.8); animation: bob 1.8s ease-in-out infinite, hintglow 1s ease-in-out infinite; }
 @keyframes hintglow { 50% { box-shadow: 0 0 0 9px #ffd43b, 0 0 34px 14px rgba(255,212,59,.9); } }
+
+/* sprint feedback */
+#world.boosting .player { filter: brightness(1.15) drop-shadow(0 0 10px rgba(255,220,80,.9)); transition: filter .1s; }
+#world.boosting .track { transition: none; }
