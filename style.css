@@ -174,3 +174,16 @@ button { font-family: inherit; }
   #player { font-size: 48px; }
   .pill { font-size: 14px; padding: 6px 10px; }
 }
+
+/* tutorial */
+#tut { position: absolute; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; background: rgba(11,16,38,.6); backdrop-filter: blur(4px); }
+#tut.on { display: flex; }
+.tut-card { background: linear-gradient(180deg, #fff, #f8f4ff); border-radius: 28px; padding: 30px 26px; width: min(480px, 92vw); text-align: center; direction: rtl; box-shadow: 0 24px 70px rgba(0,0,0,.5); animation: pop2 .35s cubic-bezier(.34,1.56,.64,1); }
+.tut-emoji { font-size: 62px; margin-bottom: 10px; animation: floaty 2.2s ease-in-out infinite; }
+.tut-text { font-size: 21px; font-weight: 800; line-height: 1.7; margin-bottom: 20px; }
+.cta { border: none; border-radius: 999px; background: linear-gradient(135deg, #51cf66, #2f9e44); color: #fff; font-size: 20px; font-weight: 900; padding: 14px 36px; cursor: pointer; box-shadow: 0 5px 0 #2b8a3e; touch-action: manipulation; }
+.cta:active { transform: translateY(4px); box-shadow: 0 1px 0 #2b8a3e; }
+
+/* hint glow on the right answer during onboarding */
+.obj.bubble.hint { box-shadow: 0 0 0 5px #ffd43b, 0 0 26px 8px rgba(255,212,59,.8); animation: bob 1.8s ease-in-out infinite, hintglow 1s ease-in-out infinite; }
+@keyframes hintglow { 50% { box-shadow: 0 0 0 9px #ffd43b, 0 0 34px 14px rgba(255,212,59,.9); } }

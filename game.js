@@ -125,7 +125,7 @@ const cheer = () => CHEERS[rand(CHEERS.length)];
 /* ============ ADVENTURE ENGINE ============ */
 const G = {
   running: false, paused: false, level: 0,
-  x: 0, speed: 260, lane: 1, raf: 0, last: 0,
+  x: 0, speed: 165, lane: 1, raf: 0, last: 0,
   objects: [], gates: [], score: 0, streak: 0, misses: 0,
   learnedThisLevel: [], missedWords: [], collectedLetters: [],
   track: document.getElementById('track'),
@@ -165,7 +165,8 @@ function pickWord(maxTier) { const p = pool(maxTier); return p[rand(p.length)]; 
 function buildLevel(li) {
   const cfg = LEVELS[li];
   const gates = [];
-  for (let i = 0; i < cfg.wordGates; i++) gates.push({ type: 'word', word: pickWord(cfg.maxTier) });
+  const deck = shuffle(pool(cfg.maxTier));
+  for (let i = 0; i < cfg.wordGates; i++) gates.push({ type: 'word', word: deck[i % deck.length] });
   for (let i = 0; i < cfg.spellGates; i++) {
     const cands = pool(cfg.maxTier).filter(w => w.en.length <= 5 && /^[a-z]+$/.test(w.en));
     gates.push({ type: 'spell', word: cands[rand(cands.length)] });
@@ -181,7 +182,7 @@ function buildLevel(li) {
 function layoutLevel(gates) {
   G.track.innerHTML = '';
   G.objects = []; G.gates = [];
-  const spacing = 620;
+  const spacing = 800;
   let x = document.getElementById('world').clientWidth * 0.75;
   // lane markers
   LANE_Y.forEach(y => {
@@ -194,6 +195,7 @@ function layoutLevel(gates) {
       const others = shuffle(WORDS.filter(w => w.en !== gate.word.en)).slice(0, 2);
       const opts = shuffle([gate.word, ...others]);
       const bubbles = opts.map((w, lane) => spawnBubble(x, lane, w.emoji, { kind: 'word', en: w.en, gate: gi, correct: w.en === gate.word.en }));
+      if (G.level === 0 && gi < 2) bubbles.find(b => b.meta.correct).el.classList.add('hint');
       G.gates.push(Object.assign({ bubbles, x, done: false, announced: false }, gate));
       x += spacing;
     } else if (gate.type === 'spell') {
@@ -201,11 +203,11 @@ function layoutLevel(gates) {
       const steps = letters.map((need, si) => {
         const poolL = 'abcdefgimnorstwy'.split('').filter(c => c !== need);
         const opts = shuffle([need, poolL[rand(poolL.length)], poolL[(rand(poolL.length) + 5) % poolL.length]]);
-        const bubbles = opts.map((ch, lane) => spawnBubble(x + si * 300, lane, null, { kind: 'letter', ch, gate: gi, step: si, correct: ch === need }, ch));
+        const bubbles = opts.map((ch, lane) => spawnBubble(x + si * 340, lane, null, { kind: 'letter', ch, gate: gi, step: si, correct: ch === need }, ch));
         return { need, bubbles, done: false };
       });
-      G.gates.push(Object.assign({ steps, x, done: false, announced: false, endX: x + (letters.length - 1) * 300 }, gate));
-      x += letters.length * 300 + spacing - 250;
+      G.gates.push(Object.assign({ steps, x, done: false, announced: false, endX: x + (letters.length - 1) * 340 }, gate));
+      x += letters.length * 340 + spacing - 250;
     } else {
       G.gates.push(Object.assign({ x, done: false, announced: false }, gate));
       x += spacing * 0.7;
@@ -288,10 +290,12 @@ function missed(w) {
 function hitCorrect(o, gate) {
   o.taken = true; o.el.classList.add('taken');
   gate.done = true;
+  hideBanner();
   G.streak++; G.score += 10 + Math.min(G.streak, 10);
   sfx.collect(G.streak);
   sparkleAt(o, '✨');
   const w = W[o.meta.en];
+  speak(w.en, 0.7);
   learned(w);
   if (G.streak > 1 && G.streak % 3 === 0) { toast(`🔥 רצף ${G.streak}! ${cheer()}`); } else { toast(`${cheer()} ${w.he} = ${w.en}`); }
   updateHud();
@@ -303,6 +307,7 @@ function hitWrong(o, gate) {
   G.player.classList.remove('hurt'); void G.player.offsetWidth; G.player.classList.add('hurt');
   if (o.meta.kind === 'word') { missed(gate.word); toast(`לא נורא! ${gate.word.he} = ${gate.word.en} - עוד פעם בדרך 💪`); speak(gate.word.en); }
   gate.done = true;
+  hideBanner();
   updateHud();
 }
 
@@ -366,6 +371,7 @@ function frame(t) {
   if (!G.running) return;
   const dt = Math.min(0.05, (t - G.last) / 1000); G.last = t;
   if (!G.paused) {
+    G.speed = (G.level === 0 && G.gates.filter(g => g.done).length < 2) ? 110 : 165;
     G.x += G.speed * dt;
     const camX = G.x - document.getElementById('world').clientWidth * PLAYER_X;
     G.track.style.transform = `translateX(${-camX}px)`;
@@ -374,7 +380,7 @@ function frame(t) {
     for (const gate of G.gates) {
       if (gate.done) continue;
       const dist = gate.x - G.x;
-      if (!gate.announced && dist < worldW * 0.55) { gate.announced = true; if (gate.type !== 'owl') announce(gate); }
+      if (!gate.announced && dist < worldW * 0.30) { gate.announced = true; if (gate.type !== 'owl') announce(gate); }
       if (gate.type === 'owl' && dist < 60) { owlGate(gate); continue; }
       if (gate.type === 'word') {
         for (const b of gate.bubbles) {
@@ -439,8 +445,44 @@ function frame(t) {
   G.raf = requestAnimationFrame(frame);
 }
 
+const TUT_STEPS = [
+  { e: '🦊', t: 'היי! אני השועל. אני רץ קדימה כל הזמן - ואתה מוביל אותי.' },
+  { e: '⬆️⬇️', t: 'עוברים בין שלושת הנתיבים: בכפתורים למטה, במקשי החצים, או בהחלקה למעלה ולמטה בטלפון.' },
+  { e: '🔊', t: 'בכל שער תשמע מילה חדשה באנגלית. למעלה תראה מה היא אומרת בעברית.' },
+  { e: '🍎', t: 'המשימה: לאסוף את הבועה עם התמונה שמתאימה למילה ששמעת! הבועה הנכונה זורחת בזהב בשני השערים הראשונים. בהצלחה!' },
+];
+let tutStep = 0;
+function showTut(onDone) {
+  tutStep = 0;
+  const el = document.getElementById('tut');
+  el.classList.add('on');
+  const render = () => {
+    const s = TUT_STEPS[tutStep];
+    document.getElementById('tut-emoji').textContent = s.e;
+    document.getElementById('tut-text').textContent = s.t;
+    document.getElementById('tut-next').textContent = tutStep === TUT_STEPS.length - 1 ? 'יאללה! 🦊' : 'הבא ←';
+  };
+  render();
+  document.getElementById('tut-next').onclick = () => {
+    sfx.unlock();
+    tutStep++;
+    if (tutStep < TUT_STEPS.length) { render(); }
+    else { el.classList.remove('on'); store.patch({ tut: 1 }); onDone(); }
+  };
+}
+
 function startLevel(li) {
   sfx.unlock();
+  if (li === 0 && !store.get().tut) {
+    startLevelRun(li);
+    G.paused = true;
+    showTut(() => { G.paused = false; G.last = performance.now(); });
+    return;
+  }
+  startLevelRun(li);
+}
+
+function startLevelRun(li) {
   G.level = li; G.x = 0; G.lane = 1; G.score = 0; G.streak = 0; G.misses = 0;
   G.learnedThisLevel = []; G.missedWords = []; G.collectedLetters = [];
   G.gates = buildLevel(li);
