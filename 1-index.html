@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ממלכת המילים · Word Kingdom</title>
+<meta name="description" content="משחק 2D ללימוד אנגלית לילדים: הרפתקה בעולם, מילים נשמעות באנגלית, איתיות, משפטים ומירוץ זוגי.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <section id="menu" class="screen on">
+    <div class="sky" id="menu-sky"><div class="stars" id="menu-stars"></div></div>
+    <div class="menu-inner">
+      <div class="menu-fox">🦊</div>
+      <h1 class="logo">ממלכת המילים<span class="en">WORD KINGDOM</span></h1>
+      <p class="tagline">הרפתקה בעולם שבה לומדים אנגלית באמת · מילים, איות ומשפטים · גילאי 8-12</p>
+      <div class="menu-btns">
+        <button class="mbtn adv" id="btn-adventure">🗺️ הרפתקה</button>
+        <button class="mbtn race" id="btn-race">🏁 מירוץ זוגי</button>
+        <button class="mbtn dict" id="btn-dict">📖 המילון שלי</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="levels" class="screen">
+    <div class="sky"><div class="stars"></div></div>
+    <button class="back-btn" data-go="menu">→ תפריט</button>
+    <div class="level-cards" id="level-cards"></div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="world sky day" id="world">
+      <div class="hill" style="left:4%; width:34%; height:30%;"></div>
+      <div class="hill" style="left:52%; width:44%; height:38%;"></div>
+      <div class="ground"></div>
+      <div id="track"></div>
+      <div id="player">🦊</div>
+    </div>
+    <div id="hud">
+      <div class="pill" id="hud-level">שלב 1</div>
+      <div id="progressbar"><i></i></div>
+      <div class="pill">⭐ <span id="hud-score">0</span></div>
+      <div class="pill">🔥 <span id="hud-streak">0</span></div>
+      <button class="pill" id="btn-quit" style="border:none;cursor:pointer;">✖</button>
+    </div>
+    <div id="banner"><div><div class="b-he" id="banner-he"></div><div class="b-sub" id="banner-sub"></div></div><button class="b-replay" id="banner-replay">🔊</button></div>
+    <div id="owl-panel"><div class="owl-card">
+      <div class="owl-emoji">🦉</div>
+      <div class="owl-he" id="owl-he"></div>
+      <div class="owl-en" id="owl-en"></div>
+      <div class="owl-opts" id="owl-opts"></div>
+    </div></div>
+    <div id="lane-btns"><button id="lane-up">⬆️</button><button id="lane-down">⬇️</button></div>
+    <div id="toast"></div>
+  </section>
+
+  <section id="done" class="screen">
+    <div class="sky"><div class="stars"></div></div>
+    <div class="done-card">
+      <div class="done-stars" id="done-stars"></div>
+      <div class="done-title" id="done-title"></div>
+      <div class="done-sub" id="done-sub"></div>
+      <div class="done-words" id="done-words"></div>
+      <div class="done-btns">
+        <button class="mbtn adv" id="btn-next">השלב הבא ←</button>
+        <button class="mbtn dict" id="btn-menu2">תפריט</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="race" class="screen">
+    <div class="sky day"></div>
+    <button class="back-btn" data-go="menu">→ תפריט</button>
+    <div class="race-wrap" id="race-wrap"></div>
+  </section>
+
+  <section id="dict" class="screen">
+    <div class="sky"><div class="stars"></div></div>
+    <button class="back-btn" data-go="menu">→ תפריט</button>
+    <div class="dict-wrap">
+      <div class="dict-title">📖 המילון שלי</div>
+      <div class="dict-sub">כל מילה שאספתם בהרפתקה - לחצו כדי לשמוע שוב</div>
+      <div class="dict-grid" id="dict-grid"></div>
+    </div>
+  </section>
+
+</div>
+<script src="game.js"></script>
+</body>
+</html>
